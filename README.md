@@ -56,34 +56,34 @@ Think **LeetCode**, but with a backend that _writes its own problems_ and a judg
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#6C63FF', 'edgeLabelBackground': '#1e1b4b', 'clusterBkg': '#1e293b', 'titleColor': '#A78BFA'}}}%%
 graph TD
-    U(("👤 User")):::user
+    U(("User")):::user
 
-    subgraph FE ["🌐 Frontend Layer — React 19 + Vite + Tailwind"]
-        R["⚛️ React Dashboard<br/><small>coderX_FrontEnd</small>"]
+    subgraph FE ["Frontend Layer - React 19 + Vite + Tailwind"]
+        R["React Dashboard - coderX_FrontEnd"]
     end
 
-    subgraph GATE ["🔀 API Gateway Layer"]
-        SS["📡 Submission Service<br/><small>Fastify · Port 3000</small>"]
-        PS["📚 Problem Service<br/><small>Express · Port 3001</small>"]
+    subgraph GATE ["API Gateway Layer"]
+        SS["Submission Service - Fastify Port 3000"]
+        PS["Problem Service - Express Port 3001"]
     end
 
-    subgraph AI ["🧠 AI Engine — FastAPI + Python"]
-        AIS["🤖 AI Service<br/><small>FastAPI · Port 8000</small>"]
-        GROQ["🔮 Groq LLM<br/><small>via LangChain</small>"]
-        EMB["🧬 Embeddings<br/><small>sentence-transformers</small>"]
-        ASTRA[("🗄️ AstraDB<br/><small>Vector Store</small>")]
+    subgraph AI ["AI Engine - FastAPI + Python"]
+        AIS["AI Service - FastAPI Port 8000"]
+        GROQ["Groq LLM via LangChain"]
+        EMB["Embeddings - sentence-transformers"]
+        ASTRA[("AstraDB - Vector Store")]
     end
 
-    subgraph EVAL ["⚙️ Evaluation Engine — TypeScript + Docker"]
-        ES["🧪 Evaluator Service<br/><small>Express · BullMQ Worker</small>"]
-        PY["🐍 Python Executor"]
-        CPP["⚙️ C++ Executor"]
-        JAVA["☕ Java Executor"]
+    subgraph EVAL ["Evaluation Engine - TypeScript + Docker"]
+        ES["Evaluator Service - Express + BullMQ Worker"]
+        PY["Python Executor"]
+        CPP["C++ Executor"]
+        JAVA["Java Executor"]
     end
 
-    subgraph STORE ["🗃️ Data Persistence"]
-        REDIS[("🔴 Redis<br/><small>BullMQ Queue</small>")]
-        MONGO[("🍃 MongoDB<br/><small>Problems + Submissions</small>")]
+    subgraph STORE ["Data Persistence"]
+        REDIS[("Redis - BullMQ Queue")]
+        MONGO[("MongoDB - Problems + Submissions")]
     end
 
     U -->|"Browse / Submit"| R
@@ -462,14 +462,14 @@ Submission {
 ```mermaid
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
-    A([Client POST\n/api/submissions]) --> B{Zod\nValidation}
-    B -->|Invalid Schema| ERR([400 Validation Error])
-    B -->|Valid| C[Persist to MongoDB\nstatus: 'Pending']
-    C --> D[Push Job to\nBullMQ Queue\n'paymentQueue']
-    D --> E([202 Accepted\nsubmissionId])
-    D -->|async| F[Evaluator Worker\ndequeues job]
+    A(["Client POST /api/submissions"]) --> B{"Zod Validation"}
+    B -->|Invalid Schema| ERR(["400 Validation Error"])
+    B -->|Valid| C["Persist to MongoDB - status: Pending"]
+    C --> D["Push Job to BullMQ Queue - paymentQueue"]
+    D --> E(["202 Accepted - submissionId"])
+    D -->|async| F["Evaluator Worker dequeues job"]
     F --> G[Docker Code Execution]
-    G --> H[Update status\nin MongoDB]
+    G --> H["Update status in MongoDB"]
 ```
 
 #### ⚙️ Environment Variables
@@ -548,23 +548,23 @@ coderX_EvaluatorService/
 ```mermaid
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
-    JOB([BullMQ Job\n{ code, language, testCase }]) --> ROUTER{Language\nRouter}
+    JOB(["BullMQ Job - code, language, testCase"]) --> ROUTER{"Language Router"}
 
     ROUTER -->|python| PY[PythonExecutor]
     ROUTER -->|cpp| CPP[CppExecutor]
     ROUTER -->|java| JAVA[JavaExecutor]
 
-    PY --> PULL[pullImage\nif not cached]
+    PY --> PULL["pullImage - if not cached"]
     CPP --> PULL
     JAVA --> PULL
 
-    PULL --> CREATE[containerFactory.ts\nspawn Docker container]
-    CREATE --> RUN[container.start()]
-    RUN --> STREAM[Capture Log Stream\nstdout + stderr]
-    STREAM --> DECODE[dockerHelper.ts\nDecode Docker Multiplex Frame]
-    DECODE -->|stderr present| ERR([RE — Runtime Error])
-    DECODE -->|stdout only| SUCCESS([Success Response\noutput: string])
-    SUCCESS & ERR --> CLEANUP[container.stop()\ncontainer.remove()]
+    PULL --> CREATE["containerFactory.ts - spawn Docker container"]
+    CREATE --> RUN["container.start()"]
+    RUN --> STREAM["Capture Log Stream - stdout + stderr"]
+    STREAM --> DECODE["dockerHelper.ts - Decode Docker Multiplex Frame"]
+    DECODE -->|stderr present| ERR(["RE - Runtime Error"])
+    DECODE -->|stdout only| SUCCESS(["Success Response - output: string"])
+    SUCCESS & ERR --> CLEANUP["container.stop() + container.remove()"]
 ```
 
 #### 🔑 How Code Execution Works
@@ -671,43 +671,46 @@ npm run dev   # Vite dev server on http://localhost:5173
 sequenceDiagram
     actor User
     participant FE as React Frontend
-    participant SS as Submission Service<br/>(Fastify)
+    participant SS as Submission Service
     participant MDB as MongoDB
     participant RQ as Redis / BullMQ
-    participant ES as Evaluator Service<br/>(BullMQ Worker)
+    participant ES as Evaluator Service
     participant DK as Docker Container
 
     User->>FE: Writes code + clicks Submit
-    FE->>SS: POST /api/submissions<br/>{ userId, problemId, code, language }
+    FE->>SS: POST /api/submissions
+    Note right of FE: userId, problemId, code, language
 
     SS->>SS: Zod validation
-    SS->>MDB: Insert Submission { status: 'Pending' }
+    SS->>MDB: Insert Submission - status: Pending
     MDB-->>SS: submissionId
 
-    SS->>RQ: Enqueue job to paymentQueue<br/>{ submissionId, code, language, testCases }
-    SS-->>FE: 202 Accepted { submissionId }
+    SS->>RQ: Enqueue job to paymentQueue
+    Note right of SS: submissionId, code, language, testCases
+    SS-->>FE: 202 Accepted - submissionId
 
     Note over RQ,ES: Async processing begins
 
     RQ->>ES: Dequeue job (BullMQ worker)
     ES->>ES: Route to language executor
     ES->>DK: Pull image if needed
-    ES->>DK: Create + Start container<br/>echo code > file && run with input
+    ES->>DK: Create + Start container
+    Note right of ES: echo code > file and run with input
     DK-->>ES: Log stream (stdout/stderr)
     ES->>ES: Decode Docker multiplex stream
 
     alt All test cases pass
-        ES->>MDB: Update status → 'Success'
+        ES->>MDB: Update status to Success
     else Runtime Error
-        ES->>MDB: Update status → 'RE'
+        ES->>MDB: Update status to RE
     else Wrong Answer
-        ES->>MDB: Update status → 'WA'
+        ES->>MDB: Update status to WA
     end
 
     ES->>DK: container.stop() + remove()
-    FE->>SS: Poll for result / WebSocket update
+    FE->>SS: Poll for result
     SS->>MDB: Fetch submission status
-    SS-->>FE: { status: 'Success' | 'WA' | 'RE' ... }
+    SS-->>FE: status - Success or WA or RE
     FE-->>User: Display verdict
 ```
 
@@ -902,16 +905,7 @@ timeline
 
 ---
 
-## 📊 Project Stats
 
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=IamAbhinav01&show_icons=true&theme=tokyonight&border_radius=12&hide_border=true&bg_color=0d1117&title_color=6C63FF&icon_color=A78BFA&text_color=c9d1d9" width="47%" alt="GitHub Stats"/>
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=IamAbhinav01&theme=tokyonight&hide_border=true&background=0d1117&ring=6C63FF&fire=A78BFA&currStreakLabel=6C63FF" width="47%" alt="GitHub Streak"/>
-</p>
-
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=IamAbhinav01&layout=compact&theme=tokyonight&hide_border=true&bg_color=0d1117&title_color=6C63FF&text_color=c9d1d9&langs_count=8" width="47%" alt="Top Languages"/>
-</p>
 
 <br/>
 
