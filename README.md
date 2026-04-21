@@ -1,247 +1,34 @@
-# coderX Workspace
-
-## Overview
-
-This workspace contains multiple services that together form the `coderX` platform for coding problem generation, problem management, submission handling, evaluation, and user interface.
-
-The repository is organized into the following main folders:
-
-- `coderX_aiService/` — Python FastAPI microservice for automated coding problem generation using LangChain, Groq, embeddings, and AstraDB.
-- `coderX_backend_service/` — Express.js backend for problem CRUD, MongoDB persistence, and API routing.
-- `coderX_EvaluatorService/` — TypeScript service for code submission evaluation, BullMQ queue processing, and Docker-backed language runners.
-- `coderX_FrontEnd/` — React + TypeScript + Vite frontend application.
-- `coderX_SubmissionService/` — Fastify microservice with a simple ping API and fastify/CORS setup.
-
----
-
-## Project Summaries
-
-### 1. `coderX_aiService`
-
-**What it does:**
-
-- Generates new competitive programming problems using an LLM.
-- Uses semantic embeddings to detect similar existing problems and avoid duplicate generation.
-- Stores generated problems and vector embeddings in AstraDB.
-- Provides a REST endpoint for problem generation.
-
-**Key technologies:**
-
-- Python 3.10+
-- FastAPI
-- LangChain
-- Groq LLM
-- Voyage AI embeddings
-- AstraDB / DataStax
-- Pydantic
-- Uvicorn
-
-**Core files:**
-
-- `main.py` — FastAPI application entrypoint.
-- `app/routes/problem_routes.py` — exposes `POST /api/v1/generate/problem`.
-- `app/services/question_generator.py` — generation pipeline with similarity search.
-- `app/prompts/problemPrompt.py` — problem prompt template.
-- `app/vector_store/astra_store.py` — vector search and insert operations.
-- `app/config/db.py` — AstraDB DataAPI client.
-- `app/config/langchainConfig.py` — Groq LLM client configuration.
-
-**Key endpoint:**
-
-- `POST /api/v1/generate/problem`
-  - Body includes `topic` and `difficulty`.
-  - Returns either a cached similar problem or a newly generated problem.
-
-**Run locally:**
-
-```bash
-cd coderX_aiService
-uv run uvicorn main:app --reload --port 8000
-```
-
----
-
-### 2. `coderX_backend_service`
-
-**What it does:**
-
-- Serves as an Express.js backend for managing coding problems.
-- Provides CRUD operations for problem records.
-- Connects to MongoDB Atlas.
-- Includes an intended AI route integration point for AI-generated problems.
-
-**Key technologies:**
-
-- Node.js / Express
-- MongoDB Atlas via Mongoose
-- body-parser
-- Winston logging
-- HTTP status codes utilities
-- `marked` / `sanitize-html` for HTML processing
-
-**Core files:**
-
-- `src/index.js` — Express app startup and DB connection.
-- `src/routes/index.js` — base router mounting `/api`.
-- `src/routes/v1/index.js` — mounts `/api/v1/problems` and `/api/v1/ai`.
-- `src/routes/v1/problems.routes.js` — problem CRUD endpoints.
-- `src/controllers/problem.controller.js` — problem request handling.
-- `src/config/db.config.js` — MongoDB Atlas connection.
-- `src/utils/ErrorHandler.js` — global error handling middleware.
-
-**Key endpoints:**
-
-- `GET /api/v1/problems`
-- `GET /api/v1/problems/:id`
-- `POST /api/v1/problems`
-- `PUT /api/v1/problems/:id`
-- `DELETE /api/v1/problems/:id`
-
-> Note: The backend imports `src/ai-question-generator/routes/aiProblemRoutes` for `/api/v1/ai`, but that module is not present in the current workspace structure.
-
-**Run locally:**
-
-```bash
-cd coderX_backend_service
-npm install
-npm run dev
-```
-
----
-
-### 3. `coderX_EvaluatorService`
-
-**What it does:**
-
-- Hosts evaluation logic for code submissions.
-- Uses BullMQ and Redis for queue-based job processing.
-- Exposes a queue admin interface at `/admin/queues`.
-- Starts a sample worker and invokes language-specific runner containers for Python, C++, and Java.
-
-**Key technologies:**
-
-- TypeScript
-- Express
-- BullMQ
-- Bull Board
-- Dockerode
-- Redis / ioredis
-- Zod for validation
-- dotenv
-
-**Core files:**
-
-- `src/main.ts` — Express app entrypoint and queue admin router.
-- `src/routes/index.ts` — main API router.
-- `src/routes/v1/index.ts` — versioned API router with ping and submissions routes.
-- `src/routes/v1/submission.Route.ts` — submission creation endpoint.
-- `src/controllers/submission.controller.ts` — submission handling logic.
-- `src/containers/` — container runner helpers for Python, C++, Java.
-- `src/config/redis.config.ts` — Redis settings.
-- `src/config/BullBoard.config.ts` — Bull Queue admin setup.
-
-**Key endpoints:**
-
-- `GET /api/v1/ping-check`
-- `POST /api/v1/submissions`
-- Queue UI: `/admin/queues`
-
-**Run locally:**
-
-```bash
-cd coderX_EvaluatorService
-npm install
-npm run dev
-```
-
----
-
-### 4. `coderX_FrontEnd`
-
-**What it does:**
-
-- Provides a frontend interface built with React and Vite.
-- Likely intended to consume backend APIs for problem display, generation, and submission workflows.
-
-**Key technologies:**
-
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
-- ESLint
-
-**Core files:**
-
-- `src/main.tsx` — frontend application bootstrap.
-- `src/App.tsx` — main application component.
-- `src/index.css` / `src/App.css` — styling.
-
-**Run locally:**
-
-```bash
-cd coderX_FrontEnd
-npm install
-npm run dev
-```
-
----
-
-### 5. `coderX_SubmissionService`
-
-**What it does:**
-
-- Hosts a lightweight Fastify microservice.
-- Registers CORS and exposes versioned API routes.
-- Currently provides a ping health endpoint.
-
-**Key technologies:**
-
-- Node.js / Fastify
-- Fastify plugin system
-- @fastify/cors
-- BullMQ
-- Redis
-- Mongoose
-
-**Core files:**
-
-- `src/index.js` — Fastify startup and app registration.
-- `src/app.js` — registers CORS and API routes.
-- `src/routes/api/api.routes.js` — mounts `/api/v1`.
-- `src/routes/api/v1/v1.routes.js` — mounts `/ping`.
-- `src/routes/api/v1/ping.routes.js` — returns `pong`.
-
-**Key endpoint:**
-
-- `GET /api/v1/ping/`
-
-**Run locally:**
-
-```bash
-cd coderX_SubmissionService
-npm install
-npm start
-```
-
----
-
-## How these services fit together
-
-- `coderX_aiService` is responsible for generating and caching coding problems using AI and vector search.
-- `coderX_backend_service` is the main management API for problems and stores problem data in MongoDB.
-- `coderX_EvaluatorService` appears to handle submission evaluation and containerized execution.
-- `coderX_FrontEnd` is the user-facing React application.
-- `coderX_SubmissionService` contains a lightweight Fastify service with a ping route and potential submission/queue capabilities.
-
-## Notes
-
-- There is no single monorepo orchestration file, so each folder is a separately runnable service.
-- `coderX_backend_service` references an AI route module that is not present in the current workspace.
-- The generated README here is based on the current workspace structure and source files.
-
----
-
-## Recommended next step
-
-If you want, I can also create a single `docker-compose.yml` or a workspace `CONTRIBUTING.md` to coordinate these services together.
+🚀 coderX Workspace<p align="center"><img src="https://readme-typing-svg.herokuapp.com?font=Orbitron&size=32&duration=3000&color=00F7FF&center=true&vCenter=true&width=900&lines=AI-POWERED+CODING+PLATFORM;MICROSERVICES+ARCHITECTURE;SEMANTIC+DEDUPLICATION+VIA+FAISS;BUILT+FOR+COMPETITIVE+PROGRAMMERS" /></p><p align="center"><img src="https://img.shields.io/badge/Architecture-Microservices-00F7FF?style=for-the-badge&logo=architecture" /><img src="https://img.shields.io/badge/Stack-MERN%20+%20FastAPI-61DAFB?style=for-the-badge&logo=react" /><img src="https://img.shields.io/badge/AI-LangChain%20%7C%20LLMs-white?style=for-the-badge&logo=chainlink" /><img src="https://img.shields.io/badge/Infrastructure-Docker-2496ED?style=for-the-badge&logo=docker" /></p>🌌 About coderXcoderX is an advanced, distributed ecosystem designed to revolutionize competitive programming. By leveraging Large Language Models (LLMs) and Vector Databases, it automates the creation of high-quality coding challenges while ensuring a secure, scalable execution environment.💎 Core Value Propositions🧠 Intelligent Generation: Automated problem creation with LLMs.📚 Semantic Integrity: Prevents duplicate problems using vector similarity search.⚡ Isolated Execution: Secure code evaluation using ephemeral Docker containers.🖥️ Production-Ready UI: Responsive React dashboard for real-time problem-solving.🏗️ System ArchitectureThe platform is built on a decoupled microservices architecture to ensure horizontal scalability and fault tolerance.Code snippetgraph TD
+subgraph Client_Layer [Frontend Layer]
+U[User Browser] --> React[React + Vite Dashboard]
+end
+
+    subgraph API_Gateway [Traffic Control]
+        React --> SS[Submission Service - Fastify]
+        React --> BS[Backend Service - Express]
+    end
+
+    subgraph AI_Engine [AI & Vector Search]
+        BS --> AIS[AI Service - FastAPI]
+        AIS --> Astra[AstraDB / FAISS]
+        AIS --> LLM[Groq / LangChain]
+    end
+
+    subgraph Execution_Engine [Judge System]
+        SS --> Redis[(Redis Queue)]
+        Redis --> Eval[Evaluator Service - TS]
+        Eval --> Docker[[Docker Runners]]
+    end
+
+    subgraph Data_Persistence [Storage]
+        BS --> Mongo[(MongoDB)]
+    end
+
+    %% Styling
+    style Client_Layer fill:#1a1a1a,stroke:#00F7FF,stroke-width:2px
+    style AI_Engine fill:#1a1a1a,stroke:#7000FF,stroke-width:2px
+    style Execution_Engine fill:#1a1a1a,stroke:#FF007A,stroke-width:2px
+
+⚡ Microservices OverviewServiceResponsibilityTech Stack🧠 AI ServiceGenerates problems & semantic searchFastAPI, LangChain, Groq⚙️ BackendCore CRUD & User managementNode.js, Express, MongoDB🧪 EvaluatorSecure sandbox executionTypeScript, BullMQ, Docker📡 SubmissionHigh-concurrency routingFastify, Redis🌐 FrontendDeveloper ExperienceReact, TypeScript, Tailwind🛠️ Deep Dive: Services🧠 coderX AI ServicePurpose: Automates the "Problem Setter" role. It creates unique problems and checks if they are "semantically similar" to existing ones to maintain platform quality.Features: Vector Embeddings, AstraDB integration, LLM Prompt Engineering.Bashcd coderX_aiService && uvicorn main:app --reload --port 8000
+🧪 coderX Evaluator ServicePurpose: The "Judge." It pulls submissions from a Redis queue and runs them against test cases in an isolated environment.Features: Multi-language support (Python, C++, Java), Containerized isolation, Bull Board monitoring.Bashcd coderX_EvaluatorService && npm run dev
+📊 Repository Stats & Activity<p align="center"><img src="https://github-readme-stats.vercel.app/api?username=IamAbhinav01&show_icons=true&theme=tokyonight&border_radius=10&hide_border=true" width="48%"/><img src="https://github-readme-streak-stats.herokuapp.com/?user=IamAbhinav01&theme=tokyonight&hide_border=true" width="48%"/></p>🔮 Roadmap & Future Improvements[ ] 🤖 AI Hint System: Dynamic hints based on user code logic.[ ] 🧠 Difficulty ML: Automatically rank problems based on pass/fail rates.[ ] 🏆 Global Leaderboards: Real-time Elo-based ranking system.[ ] 📊 Analytics: Granular insights into memory usage and execution time.[ ] ⚡ Live Execution: WebSocket-based "Run" results for instant feedback.👨‍💻 AuthorAbhinav Sunil AI Engineer | Backend Developer | Systems Builder<p align="center"><b>If you find coderX useful, give it a ⭐ to support the development!</b></p>
