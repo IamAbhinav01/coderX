@@ -244,4 +244,4 @@ This is a multi-repo project. Each service is in its own repository:
 ## 👨‍💻 Author
 
 **Abhinav Sunil** — CSE (AI/ML), Lovely Professional University · Grad 2027  
-[LinkedIn](https://linkedin.com/in/abhinavsunil) · [GitHub](https://github.com/IamAbhinav01) · abhinavsunil@hotmail.com
+[LinkedIn](https://www.linkedin.com/in/abhinav-sunil-870184279/) · [GitHub](https://github.com/IamAbhinav01) · abhinavsunil@hotmail.com
