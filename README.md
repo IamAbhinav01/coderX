@@ -1,940 +1,247 @@
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2500&pause=800&color=6C63FF&center=true&vCenter=true&width=1000&height=80&lines=⚡+coderX;AI-Powered+Coding+Platform;Where+Intelligence+Meets+Code" alt="CoderX Typing SVG" />
-</p>
+# ⚡ coderX — AI-Augmented Competitive Programming Platform
 
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=500&size=18&duration=3000&pause=1000&color=A78BFA&center=true&vCenter=true&width=900&lines=Microservices+Architecture+%7C+LLM+Problem+Generation+%7C+Sandboxed+Code+Execution;Semantic+Deduplication+%7C+BullMQ+Job+Queues+%7C+Docker+Isolation;Built+by+engineers%2C+for+competitive+programmers" />
-</p>
-
-<br/>
-
-<p align="center">
-  <!-- Architecture -->
-  <img src="https://img.shields.io/badge/Architecture-Microservices-6C63FF?style=for-the-badge&logo=serverless&logoColor=white" />
-  <img src="https://img.shields.io/badge/AI-LangChain_%7C_Groq_LLM-A78BFA?style=for-the-badge&logo=openai&logoColor=white" />
-  <img src="https://img.shields.io/badge/Execution-Docker_Sandbox-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
-  <img src="https://img.shields.io/badge/Queue-BullMQ_%7C_Redis-FF6B6B?style=for-the-badge&logo=redis&logoColor=white" />
-  <br/>
-  <!-- Tech stack -->
-  <img src="https://img.shields.io/badge/Frontend-React_19_%7C_Vite_%7C_TypeScript-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/Backend-Node.js_%7C_Express_%7C_Fastify-339933?style=for-the-badge&logo=node.js&logoColor=white" />
-  <img src="https://img.shields.io/badge/AI_Service-FastAPI_%7C_Python-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
-  <img src="https://img.shields.io/badge/DB-MongoDB_%7C_AstraDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" />
-  <br/>
-  <!-- Status -->
-  <img src="https://img.shields.io/badge/Status-Active_Development-22C55E?style=for-the-badge&logo=git&logoColor=white" />
-  <img src="https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Author-Abhinav_Sunil-EC4899?style=for-the-badge&logo=github&logoColor=white" />
-</p>
+> **A production-grade, microservices-based coding platform where an LLM writes the problems, a vector engine deduplicates them, and Docker containers judge every submission — end to end, fully automated.**
 
 ---
 
-<br/>
+## 🧠 Why This Exists
 
-## 🌌 What is coderX?
+Most coding platforms like LeetCode rely on human-curated problem sets. coderX flips that — an **AI service generates problems on demand** from a topic + difficulty prompt, a **vector similarity engine** ensures no near-duplicate ever gets stored, and an **isolated Docker judge** evaluates submissions in real-time.
 
-**coderX** is a production-grade, AI-augmented competitive programming platform built on a fully decoupled **microservices architecture**. It acts as an autonomous problem-setter and judge — generating unique coding challenges with Large Language Models, deduplicating them via vector similarity search, and evaluating code submissions by running them inside isolated Docker containers.
-
-Think **LeetCode**, but with a backend that _writes its own problems_ and a judge that _spins up fresh containers_ for every submission.
-
-<br/>
-
-> **🧠 Intelligence Layer** → Groq LLM + LangChain generates problems from a topic + difficulty prompt
->
-> **🔍 Semantic Guard** → AstraDB vector search prevents near-duplicate problems from ever being stored
->
-> **⚡ Judge System** → BullMQ job queue feeds code payloads to language-specific Docker executors
->
-> **🖥️ Developer UX** → React 19 + Vite + Tailwind frontend for fast, modern problem solving
-
-<br/>
+The goal: a fully autonomous, scalable problem-setting and judging pipeline — with zero human bottlenecks.
 
 ---
 
 ## 🏗️ System Architecture
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#6C63FF', 'edgeLabelBackground': '#1e1b4b', 'clusterBkg': '#1e293b', 'titleColor': '#A78BFA'}}}%%
-graph TD
-    U(("User")):::user
-
-    subgraph FE ["Frontend Layer - React 19 + Vite + Tailwind"]
-        R["React Dashboard - coderX_FrontEnd"]
-    end
-
-    subgraph GATE ["API Gateway Layer"]
-        SS["Submission Service - Fastify Port 3000"]
-        PS["Problem Service - Express Port 3001"]
-    end
-
-    subgraph AI ["AI Engine - FastAPI + Python"]
-        AIS["AI Service - FastAPI Port 8000"]
-        GROQ["Groq LLM via LangChain"]
-        EMB["Embeddings - sentence-transformers"]
-        ASTRA[("AstraDB - Vector Store")]
-    end
-
-    subgraph EVAL ["Evaluation Engine - TypeScript + Docker"]
-        ES["Evaluator Service - Express + BullMQ Worker"]
-        PY["Python Executor"]
-        CPP["C++ Executor"]
-        JAVA["Java Executor"]
-    end
-
-    subgraph STORE ["Data Persistence"]
-        REDIS[("Redis - BullMQ Queue")]
-        MONGO[("MongoDB - Problems + Submissions")]
-    end
-
-    U -->|"Browse / Submit"| R
-    R -->|"POST /api/submissions"| SS
-    R -->|"GET /api/problems"| PS
-    SS -->|"Persist + Enqueue"| REDIS
-    SS -->|"Save Submission"| MONGO
-    PS -->|"CRUD"| MONGO
-    R -->|"POST /generate"| AIS
-    AIS --> GROQ
-    AIS --> EMB
-    AIS <-->|"Vector Search + Upsert"| ASTRA
-    REDIS -->|"Job Dequeue"| ES
-    ES --> PY
-    ES --> CPP
-    ES --> JAVA
-    PY & CPP & JAVA -->|"Ephemeral Docker Container"| ES
-
-    classDef user fill:#6C63FF,stroke:#A78BFA,color:#fff,font-weight:bold
-    classDef fe fill:#1e3a5f,stroke:#61DAFB,color:#61DAFB
-    classDef gate fill:#1a2636,stroke:#A78BFA,color:#A78BFA
-    classDef ai fill:#1e1b4b,stroke:#7C3AED,color:#C4B5FD
-    classDef exec fill:#1a1a2e,stroke:#FF6B6B,color:#FCA5A5
-    classDef store fill:#14231a,stroke:#22C55E,color:#86EFAC
-    class R fe
-    class SS,PS gate
-    class AIS,GROQ,EMB,ASTRA ai
-    class ES,PY,CPP,JAVA exec
-    class REDIS,MONGO store
 ```
-
-<br/>
+┌──────────────────────────────────────────────────────────────────────┐
+│                        coderX Platform                               │
+│                                                                      │
+│   React 19 Frontend (TypeScript + Vite)                              │
+│        │                                                             │
+│        ▼                                                             │
+│   ┌─────────────┐    ┌──────────────────┐    ┌──────────────────┐   │
+│   │  Problem     │    │  Submission       │    │  AI Service      │   │
+│   │  Service     │    │  Service          │    │  (FastAPI/Python) │   │
+│   │  (Node.js)   │    │  (Node.js)        │    │                  │   │
+│   └──────┬──────┘    └────────┬─────────┘    └────────┬─────────┘   │
+│          │                    │                        │              │
+│          ▼                    ▼                        ▼              │
+│       MongoDB           BullMQ Queue            Groq LLM             │
+│                         (Redis-backed)          + LangChain          │
+│                                │                        │            │
+│                                ▼                        ▼            │
+│                         Evaluator Service         AstraDB            │
+│                         (TypeScript)              (Vector Store)     │
+│                         Docker Sandbox            Voyage AI          │
+│                         (per submission)          (Embeddings)       │
+└──────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 📋 Microservices at a Glance
+## 🤖 AI Service — The Intelligence Layer
 
-| # | Service | Role | Language | Port | Repo Link |
-|---|---------|------|----------|------|-----------|
-| 🧠 | **AI Service** | LLM problem generation + semantic dedup | Python / FastAPI | `8000` | [View Repo](#) |
-| 📚 | **Problem Service** *(v1)* | Problem CRUD — original version | Node.js / Express | `3000` | [View Repo](#) |
-| 📚 | **Problem Service** *(v2)* | Problem CRUD — refactored with Winston logging | Node.js / Express | `3000` | [View Repo](#) |
-| 📡 | **Submission Service** | Accepts code submissions, enqueues to Redis | Node.js / Fastify | `3000` | [View Repo](#) |
-| 🧪 | **Evaluator Service** | BullMQ worker — runs code in Docker | TypeScript / Express | `5000` | [View Repo](#) |
-| 🌐 | **Frontend** | Developer-facing React SPA | React 19 + Vite | `5173` | [View Repo](#) |
+The AI Service (`coderX_aiService`) is the most technically complex component. It's a standalone Python microservice that does three things:
 
-<br/>
+### 1. LLM-Powered Problem Generation
+
+Uses **Groq API via LangChain** to generate structured coding problems from a topic + difficulty prompt:
+
+```python
+# LangChain chain: prompt → Groq LLM → structured output
+chain = prompt_template | groq_llm | output_parser
+problem = chain.invoke({"topic": "Binary Trees", "difficulty": "Hard"})
+# Returns: title, description, test_cases, editorial, complexity
+```
+
+### 2. Semantic Deduplication via Vector Search
+
+Before storing any problem, the service checks for near-duplicates using **Voyage AI embeddings + AstraDB vector search**:
+
+```python
+# Embed the new problem
+embedding = voyage_client.embed([problem.description])
+
+# Search AstraDB for similar problems (cosine similarity)
+similar = astra_collection.find(
+    sort={"$vector": embedding},
+    limit=5,
+    projection={"$similarity": True}
+)
+
+# Reject if similarity > threshold
+if similar[0]["$similarity"] > DEDUP_THRESHOLD:
+    raise DuplicateProblemError("Too similar to existing problem")
+```
+
+### 3. Vector Storage with 1024-dim Embeddings
+
+Problems that pass deduplication are stored in **AstraDB** with their embeddings for future similarity checks — enabling the system to stay non-redundant as the problem bank grows.
 
 ---
 
-## 🔬 Deep Dive — Each Microservice
+## ⚡ Evaluator Service — The Judge
 
-<br/>
+The Evaluator Service (`coderX--Evaluator-Service`) runs submitted code inside **isolated Docker containers**:
+
+- **BullMQ job queue** (Redis-backed) receives submission payloads
+- A fresh Docker container is spun up per submission
+- Code executes in sandboxed environments: Python, Java, C++
+- Resource limits enforced (CPU, memory, time limits)
+- `stdout`/`stderr` streamed back in real time
+
+```typescript
+// TypeScript: spin up container, run code, return verdict
+const result = await containerFactory.run({
+  language: 'python',
+  code: submission.code,
+  testCases: problem.testCases,
+  timeLimit: 2000, // ms
+  memoryLimit: 256, // MB
+});
+```
+
+**This is the observability layer** — every execution is logged, timed, and tracked. Failed runs, TLE, MLE, and wrong answers are all captured with structured metadata.
 
 ---
 
-### 🧠 AI Service — `coderX_aiService`
+## 🔍 Key Technical Decisions
 
-<p>
-  <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" />
-  <img src="https://img.shields.io/badge/Python_3.10+-3776AB?style=flat-square&logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/LangChain-1C3C3C?style=flat-square&logo=langchain&logoColor=white" />
-  <img src="https://img.shields.io/badge/Groq-F55036?style=flat-square" />
-  <img src="https://img.shields.io/badge/AstraDB-6C63FF?style=flat-square" />
-  <img src="https://img.shields.io/badge/sentence--transformers-FF6B6B?style=flat-square" />
-  <img src="https://img.shields.io/badge/Pydantic_v2-E92063?style=flat-square&logo=pydantic&logoColor=white" />
-</p>
+### Why BullMQ over direct execution?
 
-**Purpose:** This is the "autonomous problem-setter" of the platform. Given a `topic` and `difficulty`, it either retrieves a semantically similar problem from AstraDB (cache hit) or generates a brand new one via the Groq LLM and persists it with a vector embedding.
+Submission spikes would overwhelm the judge. BullMQ decouples ingestion from execution, enabling horizontal scaling of the evaluator workers independently.
 
-#### 📁 Directory Structure
+### Why AstraDB over FAISS?
 
-```
-coderX_aiService/
-├── main.py                    ← FastAPI app entry point (ASGI)
-├── pyproject.toml             ← uv-managed Python dependencies
-├── app/
-│   ├── config/
-│   │   ├── langchainConfig.py ← Singleton ChatGroq client factory
-│   │   ├── db.py              ← AstraDB connection setup
-│   │   └── server.py          ← Environment variable loading
-│   ├── routes/
-│   │   └── problem_routes.py  ← POST /generate endpoint
-│   ├── services/
-│   │   └── question_generator.py ← Core generation pipeline
-│   ├── prompts/
-│   │   └── problemPrompt.py   ← LangChain PromptTemplate
-│   ├── utils/
-│   │   ├── embedder.py        ← Query & document embedding helpers
-│   │   ├── response_parser.py ← LLM JSON response parser + validator
-│   │   └── logger.py          ← Structured logging
-│   ├── vector_store/
-│   │   └── astra_store.py     ← ANN search + upsert into AstraDB
-│   └── errors/
-│       └── base_error.py      ← Custom HTTP error class
-```
+FAISS requires in-memory index rebuilds on restart. AstraDB is a persistent, serverless vector store — the deduplication index survives service restarts and scales automatically.
 
-#### 🔄 Request Lifecycle (Problem Generation)
+### Why Groq over OpenAI?
 
-```mermaid
-%%{init: {'theme': 'dark'}}%%
-flowchart LR
-    A([POST /generate\ntopic + difficulty]) --> B{Validate\nInputs}
-    B -->|Invalid| ERR1([400 Bad Request])
-    B -->|Valid| C[Build Query\nEmbedding\nsemantic vector]
-    C --> D{ANN Search\nAstraDB}
-    D -->|Cache HIT\nsimilarity > threshold| E([Return Cached Problem\nsource: 'cache'])
-    D -->|Cache MISS| F[Format LangChain\nPromptTemplate]
-    F --> G[Invoke Groq LLM\nvia ChatGroq]
-    G -->|LLM Error| ERR2([502 AI Service Error])
-    G --> H[Parse & Validate\nJSON Response]
-    H --> I[Embed Document\nfor Storage]
-    I --> J[Upsert to\nAstraDB]
-    J -->|DB Error| ERR3([500 Server Error])
-    J --> K([Return New Problem\nsource: 'generated'])
-```
+Groq's inference latency is ~10x lower for LLaMA3 models. Problem generation is a synchronous API call — low latency matters for UX.
 
-#### 🔑 Key Technical Decisions
+---
 
-| Decision | Rationale |
-|----------|-----------|
-| **Singleton `ChatGroq` client** | Avoids HTTP pool re-initialisation per request; keeps connections warm |
-| **Query vs Document embeddings** | Separate embedding calls optimised for ANN search (query) vs storage (document) |
-| **`parse_llm_response` validator** | Handles LLM JSON malformation (common with large editorials); strips markdown fences, retries parsing |
-| **18 valid topics enforced** | Prevents prompt injection; constrains LLM scope to competitive programming domains |
-| **AstraDB vector threshold** | Prevents near-duplicate problems from polluting the problem set |
+## 🛠️ Full Tech Stack
 
-#### ⚙️ Environment Variables
+| Layer                   | Technology                                          |
+| ----------------------- | --------------------------------------------------- |
+| **Frontend**            | React 19, TypeScript, Vite, Tailwind CSS            |
+| **Problem Service**     | Node.js, Express.js, MongoDB, REST API              |
+| **Submission Service**  | Node.js, BullMQ, Redis, MongoDB                     |
+| **AI Service**          | Python, FastAPI, LangChain, Groq LLM                |
+| **Vector Store**        | AstraDB (DataStax), Voyage AI embeddings (1024-dim) |
+| **Judge / Evaluator**   | TypeScript, Docker, dockerode, BullMQ workers       |
+| **Languages Supported** | Python, Java, C++                                   |
+| **Monitoring**          | Bull Board (queue dashboard), structured logging    |
 
-```bash
-GROQ_API_KEY=gsk_...
-GROQ_MODEL=llama3-70b-8192
-GROQ_TEMPERATURE=0.7
-GROQ_MAX_TOKENS=4096
-ASTRA_DB_APPLICATION_TOKEN=AstraCS:...
-ASTRA_DB_API_ENDPOINT=https://...
-ASTRA_DB_NAMESPACE=coderx
-ASTRA_COLLECTION_NAME=problems
-```
+---
 
-#### 🚀 Run Locally
+## 🚀 Running Locally
+
+### Prerequisites
+
+- Node.js 18+, Python 3.10+, Docker
+- Redis (for BullMQ)
+- Groq API key, AstraDB credentials, Voyage AI key
+
+### 1. AI Service
 
 ```bash
 cd coderX_aiService
-uv run uvicorn main:app --reload --port 8000
-# Swagger UI → http://localhost:8000/docs
-# ReDoc     → http://localhost:8000/redoc
+pip install -r requirements.txt
+# Set env vars: GROQ_API_KEY, ASTRA_DB_TOKEN, VOYAGE_API_KEY
+uvicorn main:app --reload --port 8001
 ```
 
-#### 📡 API Endpoints
-
-| Method | Path | Description | Response |
-|--------|------|-------------|----------|
-| `POST` | `/generate` | Generate or retrieve a problem | `{ source, problem }` |
-| `GET` | `/health` | Liveness probe | `{ status: "ok" }` |
-| `GET` | `/docs` | Swagger UI | — |
-| `GET` | `/redoc` | ReDoc UI | — |
-
-<br/>
-
----
-
-### 📚 Problem Service v1 — `coderX---Problem_Service`
-
-<p>
-  <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=node.js&logoColor=white" />
-  <img src="https://img.shields.io/badge/Express_v5-000000?style=flat-square&logo=express&logoColor=white" />
-  <img src="https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white" />
-  <img src="https://img.shields.io/badge/Mongoose-880000?style=flat-square" />
-  <img src="https://img.shields.io/badge/marked-FF6B6B?style=flat-square" />
-</p>
-
-**Purpose:** The original RESTful CRUD backend for managing coding problems stored in MongoDB. Handles creation, retrieval, update, and deletion of `Problem` documents. Includes Markdown-to-HTML sanitization for problem descriptions via `marked` and `sanitize-html`.
-
-#### 📁 Directory Structure
-
-```
-coderX---Problem_Service/
-├── src/
-│   ├── index.js              ← Express app bootstrap + DB connection
-│   ├── config/
-│   │   └── db.config.js      ← Mongoose connection factory
-│   ├── models/
-│   │   └── problem.model.js  ← Mongoose Problem schema
-│   ├── routes/
-│   │   ├── index.js          ← Router aggregator
-│   │   └── v1/               ← Versioned API routes
-│   ├── controllers/          ← Request/response handlers
-│   ├── services/
-│   │   └── problem.service.js ← Business logic layer
-│   ├── repositories/         ← Data access layer (Mongoose ops)
-│   ├── errors/               ← Custom error classes
-│   └── utils/
-│       └── ErrorHandler.js   ← Express error middleware
-```
-
-#### 🗃️ Problem Data Model
-
-```javascript
-Problem {
-  title:       String  (required)
-  description: String  (required, stored as sanitized HTML)
-  difficulty:  String  enum['easy', 'medium', 'hard']
-  testCases:   [{ input: String, output: String }]
-  codeStubs:   [{
-                  language: enum['python', 'java', 'cpp'],
-                  startSnippet: String,
-                  endSnippet:   String
-               }]
-  editorial:   String  (optional solution explanation)
-  topic:       String  (e.g. "dynamic programming")
-  createdAt:   Date    (auto-generated)
-}
-```
-
-#### 🔄 Request Flow
-
-```mermaid
-%%{init: {'theme': 'dark'}}%%
-sequenceDiagram
-    participant C as Client
-    participant R as Router (Express)
-    participant Ctrl as Controller
-    participant Svc as ProblemService
-    participant Repo as ProblemRepository
-    participant DB as MongoDB
-
-    C->>R: POST /api/v1/problems
-    R->>Ctrl: route handler
-    Ctrl->>Svc: createProblem(data)
-    Svc->>Svc: markdownToHtml(description)
-    Svc->>Repo: createProblem(processedData)
-    Repo->>DB: Problem.create(doc)
-    DB-->>Repo: savedDoc
-    Repo-->>Svc: savedDoc
-    Svc-->>Ctrl: savedDoc
-    Ctrl-->>C: 201 { problem }
-```
-
-#### 📡 API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/v1/problems` | Create a new problem |
-| `GET` | `/api/v1/problems` | List all problems |
-| `GET` | `/api/v1/problems/:id` | Get problem by ID |
-| `PUT` | `/api/v1/problems/:id` | Update a problem |
-| `DELETE` | `/api/v1/problems/:id` | Delete a problem |
-
-#### 🚀 Run Locally
+### 2. Problem Service
 
 ```bash
 cd coderX---Problem_Service
 npm install
-npm run dev   # nodemon src/index.js on :3000
+npm start  # port 3001
 ```
 
-<br/>
-
----
-
-### 📚 Problem Service v2 — `coderX_problem_service`
-
-<p>
-  <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=node.js&logoColor=white" />
-  <img src="https://img.shields.io/badge/Express_v5-000000?style=flat-square&logo=express&logoColor=white" />
-  <img src="https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white" />
-  <img src="https://img.shields.io/badge/Winston-FF6B6B?style=flat-square" />
-  <img src="https://img.shields.io/badge/winston--mongodb-47A248?style=flat-square" />
-</p>
-
-**Purpose:** An evolved, production-hardened version of the Problem Service. The architecture is identical to v1 but adds **structured Winston logging** with a MongoDB transport, meaning all log events are persisted to the database alongside the problem data — enabling audit trails and operational visibility.
-
-#### 🔑 Differences from v1
-
-| Feature | v1 | v2 |
-|---------|----|----|
-| Logging | `console.log` | Winston structured logger |
-| Log transport | stdout only | stdout + MongoDB (winston-mongodb) |
-| Log level control | None | `NODE_ENV`-aware |
-| Dependency | — | `winston`, `winston-mongodb` |
-
-#### 📁 Directory Structure
-
-```
-coderX_problem_service/
-├── src/
-│   ├── index.js              ← Express app bootstrap + DB connection
-│   ├── config/               ← DB + server configs
-│   ├── models/               ← Mongoose Problem schema (identical to v1)
-│   ├── routes/               ← API route definitions
-│   ├── controllers/          ← Request handlers
-│   ├── services/
-│   │   └── problem.service.js ← Business logic with Markdown processing
-│   ├── repositories/         ← Data access layer
-│   ├── errors/               ← Custom error types
-│   └── utils/
-│       ├── ErrorHandler.js   ← Global error middleware
-│       └── markdownSanitiser.js ← marked + sanitize-html pipeline
-```
-
-#### 🚀 Run Locally
+### 3. Submission Service
 
 ```bash
-cd coderX_problem_service
+cd coderX---submissionService
 npm install
-MONGO_URI=mongodb://... npm run dev
+npm start  # port 3002
 ```
 
-<br/>
-
----
-
-### 📡 Submission Service — `coderX_SubmissionService`
-
-<p>
-  <img src="https://img.shields.io/badge/Fastify_v5-000000?style=flat-square&logo=fastify&logoColor=white" />
-  <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=node.js&logoColor=white" />
-  <img src="https://img.shields.io/badge/BullMQ-FF6B6B?style=flat-square&logo=redis&logoColor=white" />
-  <img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white" />
-  <img src="https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white" />
-  <img src="https://img.shields.io/badge/Zod-3E67B1?style=flat-square" />
-</p>
-
-**Purpose:** The high-throughput ingestion gateway for code submissions. It uses **Fastify** (not Express) for its significantly higher request throughput, accepts a submission payload from the frontend, validates it with Zod, persists it to MongoDB with a `Pending` status, and dispatches a job to a **BullMQ queue** backed by Redis for the Evaluator to process.
-
-#### 📁 Directory Structure
-
-```
-coderX_SubmissionService/
-├── src/
-│   ├── index.js              ← Fastify server bootstrap (port 3000)
-│   ├── app.js                ← Plugin registration
-│   ├── config/               ← Redis + DB config
-│   ├── models/
-│   │   └── submission.models.js ← Mongoose Submission schema
-│   ├── routes/
-│   │   └── api/              ← Versioned API routes
-│   ├── controllers/          ← Fastify route handlers
-│   ├── services/
-│   │   ├── submission.service.js ← Core submission logic
-│   │   └── servicePlugin.js  ← Fastify plugin wrapper
-│   ├── producers/            ← BullMQ queue producers
-│   ├── queue/                ← Queue initialization helpers
-│   ├── repositories/         ← Mongoose data access layer
-│   ├── errors/               ← HTTP error classes
-│   └── validators/           ← Zod validation schemas
-```
-
-#### 🗃️ Submission Data Model
-
-```javascript
-Submission {
-  userId:    String  (required)
-  problemId: String  (required)
-  code:      String  (required — the user's source code)
-  language:  String  (required — 'python' | 'java' | 'cpp')
-  status:    String  enum['Pending', 'Success', 'RE', 'TLE', 'MLE', 'WA']
-                     default: 'Pending'
-}
-```
-
-**Status Codes Explained:**
-
-| Code | Meaning |
-|------|---------|
-| `Pending` | Enqueued, not yet evaluated |
-| `Success` | All test cases passed |
-| `RE` | Runtime Error |
-| `TLE` | Time Limit Exceeded |
-| `MLE` | Memory Limit Exceeded |
-| `WA` | Wrong Answer |
-
-#### 🔄 Submission Lifecycle
-
-```mermaid
-%%{init: {'theme': 'dark'}}%%
-flowchart TD
-    A(["Client POST /api/submissions"]) --> B{"Zod Validation"}
-    B -->|Invalid Schema| ERR(["400 Validation Error"])
-    B -->|Valid| C["Persist to MongoDB - status: Pending"]
-    C --> D["Push Job to BullMQ Queue - paymentQueue"]
-    D --> E(["202 Accepted - submissionId"])
-    D -->|async| F["Evaluator Worker dequeues job"]
-    F --> G[Docker Code Execution]
-    G --> H["Update status in MongoDB"]
-```
-
-#### ⚙️ Environment Variables
+### 4. Evaluator Service
 
 ```bash
-REDIS_HOST=localhost
-REDIS_PORT=6379
-MONGO_URI=mongodb://...
-PORT=3000
-```
-
-#### 🚀 Run Locally
-
-```bash
-cd coderX_SubmissionService
+cd coderX--Evaluator-Service
 npm install
-npm start   # nodemon src/index.js
+npm run dev  # consumes from BullMQ
 ```
 
-<br/>
-
----
-
-### 🧪 Evaluator Service — `coderX_EvaluatorService`
-
-<p>
-  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/Express_v5-000000?style=flat-square&logo=express&logoColor=white" />
-  <img src="https://img.shields.io/badge/BullMQ-FF6B6B?style=flat-square&logo=redis&logoColor=white" />
-  <img src="https://img.shields.io/badge/Dockerode-2496ED?style=flat-square&logo=docker&logoColor=white" />
-  <img src="https://img.shields.io/badge/Bull_Board-F59E0B?style=flat-square" />
-  <img src="https://img.shields.io/badge/Zod-3E67B1?style=flat-square" />
-</p>
-
-**Purpose:** This is the **Judge** — the most infrastructure-intensive service in the platform. It runs as a BullMQ worker, consuming code submission jobs from Redis. For each job, it spins up a **fresh, isolated Docker container** for the target language (Python, C++, or Java), executes the code against the provided test case input, captures stdout/stderr, and returns the result. Containers are destroyed immediately after execution.
-
-#### 📁 Directory Structure
-
-```
-coderX_EvaluatorService/
-├── src/
-│   ├── main.ts               ← Express server + Worker initialization
-│   ├── config/
-│   │   ├── server.config.ts  ← Server port + env config
-│   │   ├── redis.config.ts   ← ioredis connection
-│   │   └── BullBoard.config.ts ← Bull Board dashboard adapter
-│   ├── containers/
-│   │   ├── containerFactory.ts ← Generic Docker container spawner
-│   │   ├── dockerHelper.ts   ← Docker stream decoder (stdout/stderr mux)
-│   │   ├── pullImage.ts      ← Docker image puller
-│   │   ├── pythonExecutor.ts ← Python-specific Docker execution
-│   │   ├── cppExecutor.ts    ← C++-specific Docker execution
-│   │   └── javaExecutor.ts   ← Java-specific Docker execution
-│   ├── workers/
-│   │   └── sampleWorker.ts   ← BullMQ Worker factory
-│   ├── jobs/
-│   │   └── sampleJob.ts      ← Job handler class
-│   ├── queues/
-│   │   └── sampleQueue.ts    ← Queue definition (paymentQueue)
-│   ├── producers/
-│   │   └── sampleQueueProducers.ts ← Job enqueuer
-│   ├── routes/               ← HTTP API routes
-│   ├── controllers/
-│   │   ├── ping.controller.ts ← Health check endpoint
-│   │   └── submission.controller.ts ← Submission status endpoint
-│   ├── dtos/                 ← Data Transfer Objects
-│   ├── types/
-│   │   └── codeExecutor.ts   ← ExecutionResponse interface
-│   ├── utils/
-│   │   └── constants.ts      ← Docker image names (PYTHON_IMAGE, etc.)
-│   └── validators/           ← Zod schemas
-```
-
-#### 🐳 Docker Execution Pipeline
-
-```mermaid
-%%{init: {'theme': 'dark'}}%%
-flowchart TD
-    JOB(["BullMQ Job - code, language, testCase"]) --> ROUTER{"Language Router"}
-
-    ROUTER -->|python| PY[PythonExecutor]
-    ROUTER -->|cpp| CPP[CppExecutor]
-    ROUTER -->|java| JAVA[JavaExecutor]
-
-    PY --> PULL["pullImage - if not cached"]
-    CPP --> PULL
-    JAVA --> PULL
-
-    PULL --> CREATE["containerFactory.ts - spawn Docker container"]
-    CREATE --> RUN["container.start()"]
-    RUN --> STREAM["Capture Log Stream - stdout + stderr"]
-    STREAM --> DECODE["dockerHelper.ts - Decode Docker Multiplex Frame"]
-    DECODE -->|stderr present| ERR(["RE - Runtime Error"])
-    DECODE -->|stdout only| SUCCESS(["Success Response - output: string"])
-    SUCCESS & ERR --> CLEANUP["container.stop() + container.remove()"]
-```
-
-#### 🔑 How Code Execution Works
-
-Each executor follows this exact pattern:
-```typescript
-// Example: PythonExecutor (simplified)
-1. Pull Docker image (python:3.11-alpine) if not present
-2. Create container with command:
-   sh -c "echo '<code>' > test.py && echo '<input>' | python3 test.py"
-3. Start container & attach log stream (stdout + stderr)
-4. Await stream 'end' event
-5. Decode Docker multiplexed stream (8-byte header per frame)
-6. If stderr → reject with runtime error
-7. If stdout → resolve with output string
-8. finally: container.stop() + container.remove()
-```
-
-#### 📊 Bull Board Dashboard
-
-The service exposes an admin UI at `/admin/queues` (via `@bull-board/express`) for real-time queue monitoring — inspect pending, active, completed, and failed jobs.
-
-#### 🚀 Run Locally
-
-```bash
-cd coderX_EvaluatorService
-npm install
-npm run dev   # ts-node src/main.ts via nodemon
-# Bull Board → http://localhost:5000/admin/queues
-```
-
-#### ⚙️ Environment Variables
-
-```bash
-PORT=5000
-REDIS_HOST=localhost
-REDIS_PORT=6379
-```
-
-<br/>
-
----
-
-### 🌐 Frontend — `coderX_FrontEnd`
-
-<p>
-  <img src="https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/Vite_8-646CFF?style=flat-square&logo=vite&logoColor=white" />
-  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS_v3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
-</p>
-
-**Purpose:** The developer-facing Single Page Application. Built with React 19, Vite 8, TypeScript, and Tailwind CSS. Currently implements a hero landing page showcasing the coderX brand and CTA buttons for problem generation and discovery.
-
-#### 📁 Directory Structure
-
-```
-coderX_FrontEnd/
-├── index.html                ← App shell
-├── vite.config.ts            ← Vite config (@vitejs/plugin-react)
-├── tailwind.config.js        ← Tailwind theme config
-├── tsconfig.json             ← TypeScript base config
-├── src/
-│   ├── main.tsx              ← React DOM root mount
-│   ├── App.tsx               ← Application root component
-│   ├── App.css               ← Global base styles
-│   ├── index.css             ← Tailwind directives
-│   ├── assets/
-│   │   └── hero.png          ← Hero section image
-│   └── components/
-│       ├── Hero.tsx          ← Landing hero section
-│       └── Hero.module.css   ← CSS Modules for hero
-```
-
-#### 🖥️ UI Components
-
-| Component | Description |
-|-----------|-------------|
-| `Hero` | Landing page hero with animated coderX branding, tagline, and CTAs |
-
-#### 🌟 Hero Component Features
-
-- Animated **coderX** brand with kinetic `X` effect (CSS animation)
-- Tagline: *"Elevate your technical skills with AI-engineered coding interview questions tailored exactly to your seniority and target role."*
-- CTA buttons: **Generate Problem** and **Learn More**
-- Responsive layout with hero image panel
-
-#### 🚀 Run Locally
+### 5. Frontend
 
 ```bash
 cd coderX_FrontEnd
 npm install
-npm run dev   # Vite dev server on http://localhost:5173
+npm run dev  # port 5173
 ```
-
-<br/>
 
 ---
 
-## ⚡ End-to-End Submission Workflow
+## 📡 API Reference
 
-```mermaid
-%%{init: {'theme': 'dark', 'sequence': {'actorMargin': 50}}}%%
-sequenceDiagram
-    actor User
-    participant FE as React Frontend
-    participant SS as Submission Service
-    participant MDB as MongoDB
-    participant RQ as Redis / BullMQ
-    participant ES as Evaluator Service
-    participant DK as Docker Container
+### AI Service Endpoints
 
-    User->>FE: Writes code + clicks Submit
-    FE->>SS: POST /api/submissions
-    Note right of FE: userId, problemId, code, language
+```
+POST /api/v1/problems/generate
+  Body: { "topic": "string", "difficulty": "Easy|Medium|Hard" }
+  Returns: { problem, embedding_stored, dedup_passed }
 
-    SS->>SS: Zod validation
-    SS->>MDB: Insert Submission - status: Pending
-    MDB-->>SS: submissionId
+GET  /api/v1/problems/
+  Returns: paginated list of generated problems
 
-    SS->>RQ: Enqueue job to paymentQueue
-    Note right of SS: submissionId, code, language, testCases
-    SS-->>FE: 202 Accepted - submissionId
-
-    Note over RQ,ES: Async processing begins
-
-    RQ->>ES: Dequeue job (BullMQ worker)
-    ES->>ES: Route to language executor
-    ES->>DK: Pull image if needed
-    ES->>DK: Create + Start container
-    Note right of ES: echo code > file and run with input
-    DK-->>ES: Log stream (stdout/stderr)
-    ES->>ES: Decode Docker multiplex stream
-
-    alt All test cases pass
-        ES->>MDB: Update status to Success
-    else Runtime Error
-        ES->>MDB: Update status to RE
-    else Wrong Answer
-        ES->>MDB: Update status to WA
-    end
-
-    ES->>DK: container.stop() + remove()
-    FE->>SS: Poll for result
-    SS->>MDB: Fetch submission status
-    SS-->>FE: status - Success or WA or RE
-    FE-->>User: Display verdict
+GET  /health
+  Returns: service status
 ```
 
-<br/>
+### Submission Flow
+
+```
+POST /api/submissions        → enqueues to BullMQ
+GET  /api/submissions/:id    → polls verdict
+WS   /ws/submissions/:id     → real-time verdict stream (planned)
+```
 
 ---
 
-## 🧠 AI Problem Generation Workflow
+## 💡 What I Built End-to-End
 
-```mermaid
-%%{init: {'theme': 'dark'}}%%
-flowchart LR
-    A([User Request\ntopic='arrays'\ndifficulty='hard']) --> B
+This isn't a tutorial project. Every service — AI generation, semantic dedup, job queueing, Docker sandboxing, and the React frontend — was designed and implemented from scratch:
 
-    subgraph AIS ["🤖 AI Service — FastAPI"]
-        B[Validate Inputs\nZod-like guards] --> C
-        C[Build semantic\nquery string] --> D
-        D[sentence-transformers\nEmbed query → 768-dim vector] --> E
-        E{ANN Search\nAstraDB\ncosine similarity}
-    end
-
-    E -->|"similarity > 0.92\nCACHE HIT"| DONE1([Return existing problem\nsource: 'cache'])
-    E -->|"No match\nCACHE MISS"| F
-
-    subgraph LLM ["🔮 LLM Pipeline"]
-        F[Format LangChain\nPromptTemplate\ntopic + difficulty] --> G
-        G[Invoke ChatGroq\nllama3-70b-8192] --> H
-        H[response_parser.py\nStrip fences + parse JSON\nValidate schema] --> I
-    end
-
-    subgraph STORE ["🗄️ Persistence"]
-        I[Embed problem text\ndocument vector] --> J
-        J[AstraDB.insertOne\nproblem + $vector]
-    end
-
-    J --> DONE2([Return problem\nsource: 'generated'])
-```
-
-<br/>
+- Designed the **microservices split** (which service owns what)
+- Chose **AstraDB over FAISS** after benchmarking persistence requirements
+- Tuned the **deduplication threshold** by testing against similar problems
+- Dealt with **real Docker edge cases**: container cleanup on TLE, OOM kills, zombie processes
+- Built **Bull Board integration** to monitor queue health in dev
 
 ---
 
-## 🛠️ Tech Stack Summary
+## 🔗 Related Repos
 
-### Languages & Runtimes
+This is a multi-repo project. Each service is in its own repository:
 
-| Technology | Used In | Purpose |
-|------------|---------|---------|
-| **Python 3.10+** | AI Service | FastAPI app, LLM integration, embeddings |
-| **TypeScript** | Evaluator Service | Type-safe BullMQ workers, Docker executors |
-| **JavaScript (ESM/CJS)** | Problem Service, Submission Service | Node.js backend services |
-| **TSX / React** | Frontend | Component-based UI |
-
-### Infrastructure & Databases
-
-| Technology | Role |
-|------------|------|
-| **Docker** | Sandboxed code execution (Python, C++, Java containers) |
-| **Redis** | BullMQ message broker for submission queues |
-| **MongoDB + Mongoose** | Problem and submission persistence |
-| **AstraDB (Cassandra)** | Vector database for semantic problem search |
-
-### AI / ML Stack
-
-| Technology | Role |
-|------------|------|
-| **Groq** | Ultra-fast LLM inference (llama3-70b) |
-| **LangChain** | LLM orchestration, PromptTemplate management |
-| **sentence-transformers** | Local embedding model (BAAI/bge-large-en-v1.5, 1024-dim) |
-
-### Key Libraries
-
-| Library | Service | Purpose |
-|---------|---------|---------|
-| `bullmq` | Submission + Evaluator | Job queue management |
-| `dockerode` | Evaluator | Docker container API client |
-| `@bull-board` | Evaluator | Queue monitoring dashboard |
-| `fastify` | Submission | High-throughput HTTP server |
-| `zod` | Submission + Evaluator | Runtime schema validation |
-| `pydantic v2` | AI Service | Data validation + serialization |
-| `marked` + `sanitize-html` | Problem Services | Markdown-to-HTML rendering |
-| `winston` + `winston-mongodb` | Problem Service v2 | Structured log persistence |
-| `astrapy` | AI Service | AstraDB Python SDK |
-
-<br/>
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-```bash
-# Required services
-docker --version    # >= 20.x
-redis-server        # >= 7.x
-mongod              # >= 6.x
-
-# Runtimes
-node --version      # >= 20.x LTS
-python --version    # >= 3.10
-uv --version        # Python package manager (recommended)
-```
-
-### 1. Clone the Monorepo
-
-```bash
-git clone https://github.com/IamAbhinav01/coderX.git
-cd coderX
-```
-
-### 2. Launch Infrastructure
-
-```bash
-# Start Redis
-docker run -d -p 6379:6379 redis:7-alpine
-
-# Start MongoDB
-docker run -d -p 27017:27017 mongo:6
-```
-
-### 3. Start Each Service
-
-```bash
-# Terminal 1 — AI Service
-cd coderX_aiService && cp .env.example .env   # fill in API keys
-uv run uvicorn main:app --reload --port 8000
-
-# Terminal 2 — Problem Service (v2)
-cd coderX_problem_service && npm install
-MONGO_URI=mongodb://localhost:27017/coderx npm run dev
-
-# Terminal 3 — Submission Service
-cd coderX_SubmissionService && npm install
-npm start
-
-# Terminal 4 — Evaluator Service
-cd coderX_EvaluatorService && npm install
-npm run dev
-
-# Terminal 5 — Frontend
-cd coderX_FrontEnd && npm install
-npm run dev   # → http://localhost:5173
-```
-
-### Default Port Map
-
-| Service | Port |
-|---------|------|
-| Frontend | `5173` |
-| AI Service | `8000` |
-| Problem Service | `3000` |
-| Submission Service | `3000` |
-| Evaluator Service | `5000` |
-| Bull Board UI | `5000/admin/queues` |
-| Redis | `6379` |
-| MongoDB | `27017` |
-
-<br/>
-
----
-
-## 🔮 Roadmap
-
-```mermaid
-%%{init: {'theme': 'dark'}}%%
-timeline
-    title coderX Development Roadmap
-    section Current
-        Core Microservices  : AI Problem Generation
-                            : Docker Code Execution
-                            : BullMQ Job Queues
-                            : React Frontend Shell
-    section Short-term
-        Auth System         : JWT Authentication
-                            : User profiles + history
-        Live Execution      : WebSocket real-time results
-                            : Progress indicator per test case
-    section Mid-term
-        AI Hints            : Context-aware dynamic hints
-                            : Based on submitted code analysis
-        Leaderboards        : Elo-based global ranking
-                            : Per-topic standings
-    section Long-term
-        ML Difficulty       : Auto-rank problems by pass rate
-                            : Time/memory analytics
-        Collaborative Mode  : Pair programming sessions
-                            : Interview simulation rooms
-```
-
-<br/>
-
----
-
-
-
-<br/>
+| Service               | Repo                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| AI Problem Generation | [coderX_aiService](https://github.com/IamAbhinav01/coderX_aiService)                     |
+| Problem CRUD API      | [coderX---Problem_Service](https://github.com/IamAbhinav01/coderX---Problem_Service)     |
+| Submission Queue      | [coderX---submissionService](https://github.com/IamAbhinav01/coderX---submissionService) |
+| Docker Judge          | [coderX--Evaluator-Service](https://github.com/IamAbhinav01/coderX--Evaluator-Service)   |
+| Frontend              | [coderX_FrontEnd](https://github.com/IamAbhinav01/coderX_FrontEnd)                       |
 
 ---
 
 ## 👨‍💻 Author
 
-<p align="center">
-  <b>Abhinav Sunil</b><br/>
-  <i>AI Engineer · Backend Architect · Systems Builder</i><br/><br/>
-  <a href="#">
-    <img src="https://img.shields.io/badge/GitHub-IamAbhinav01-6C63FF?style=for-the-badge&logo=github" />
-  </a>
-  <a href="#">
-    <img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin" />
-  </a>
-  <a href="#">
-    <img src="https://img.shields.io/badge/Portfolio-Visit-A78BFA?style=for-the-badge&logo=safari&logoColor=white" />
-  </a>
-</p>
-
-<br/>
-
----
-
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=700&size=14&duration=4000&pause=1500&color=6C63FF&center=true&vCenter=true&width=600&lines=Built+with+%E2%9D%A4%EF%B8%8F+by+Abhinav+Sunil;If+coderX+helps+you%2C+drop+a+%E2%AD%90+on+GitHub!" />
-</p>
-
-<p align="center">
-  <sub>© 2026 coderX — MIT License</sub>
-</p>
+**Abhinav Sunil** — CSE (AI/ML), Lovely Professional University · Grad 2027  
+[LinkedIn](https://linkedin.com/in/abhinavsunil) · [GitHub](https://github.com/IamAbhinav01) · abhinavsunil@hotmail.com
