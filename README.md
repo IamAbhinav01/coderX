@@ -1,84 +1,138 @@
-# ⚡ coderX — AI-Augmented Competitive Programming Platform
 
-> **A production-grade, microservices-based coding platform where an LLM writes the problems, a vector engine deduplicates them, and Docker containers judge every submission — end to end, fully automated.**
+<!-- Header Banner -->
+<div align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=28&duration=3000&pause=500&color=00F7FF&center=true&vCenter=true&width=600&lines=⚡+coderX+⚡;AI-Augmented+Competitive+Programming;Zero+Human+Problem+Curation;Fully+Autonomous+Judge" alt="Typing SVG" />
+</div>
+
+<br/>
+
+<!-- IMPORTANT ALERT BANNER - IMMEDIATELY VISIBLE -->
+<div align="center">
+  
+  ⚠️ **NO CODE IN THIS REPO — DOCUMENTATION ONLY** ⚠️
+  
+</div>
+
+<div align="center">
+  
+| 🚀 **MICROSERVICE** | 🔗 **REPOSITORY LINK** |
+|:-------------------:|:----------------------:|
+| 🤖 **AI Service** | [coderX_aiService](https://github.com/IamAbhinav01/coderX_aiService) |
+| 📝 **Problem Service** | [coderX---Problem_Service](https://github.com/IamAbhinav01/coderX---Problem_Service) |
+| 📤 **Submission Service** | [coderX---submissionService](https://github.com/IamAbhinav01/coderX---submissionService) |
+| ⚡ **Evaluator Service** | [coderX--Evaluator-Service](https://github.com/IamAbhinav01/coderX--Evaluator-Service) |
+| 🎨 **Frontend** | [coderX_FrontEnd](https://github.com/IamAbhinav01/coderX_FrontEnd) |
+
+</div>
+
+<div align="center">
+  
+  <a href="#"><img src="https://img.shields.io/badge/Microservices-5-00F7FF?style=for-the-badge&logo=kubernetes&logoColor=white" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/Status-Active-00FF88?style=for-the-badge&logo=vercel&logoColor=white" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/Powered_By-Groq_LLM-FF0055?style=for-the-badge&logo=groq&logoColor=white" /></a>
+  
+</div>
+
+<br/>
 
 ---
 
 ## 🧠 Why This Exists
 
-Most coding platforms like LeetCode rely on human-curated problem sets. coderX flips that — an **AI service generates problems on demand** from a topic + difficulty prompt, a **vector similarity engine** ensures no near-duplicate ever gets stored, and an **isolated Docker judge** evaluates submissions in real-time.
+> **Most coding platforms rely on human-curated problem sets. coderX flips that script.**
 
-The goal: a fully autonomous, scalable problem-setting and judging pipeline — with zero human bottlenecks.
+An **AI service generates problems on demand** from a topic + difficulty prompt, a **vector similarity engine** ensures no near-duplicate ever gets stored, and an **isolated Docker judge** evaluates submissions in real-time.
+
+🎯 **The vision:** A fully autonomous, scalable problem-setting and judging pipeline — with **zero human bottlenecks**.
 
 ---
 
 ## 🏗️ System Architecture
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                        coderX Platform                               │
-│                                                                      │
-│   React 19 Frontend (TypeScript + Vite)                              │
-│        │                                                             │
-│        ▼                                                             │
-│   ┌─────────────┐    ┌──────────────────┐    ┌──────────────────┐   │
-│   │  Problem     │    │  Submission       │    │  AI Service      │   │
-│   │  Service     │    │  Service          │    │  (FastAPI/Python) │   │
-│   │  (Node.js)   │    │  (Node.js)        │    │                  │   │
-│   └──────┬──────┘    └────────┬─────────┘    └────────┬─────────┘   │
-│          │                    │                        │              │
-│          ▼                    ▼                        ▼              │
-│       MongoDB           BullMQ Queue            Groq LLM             │
-│                         (Redis-backed)          + LangChain          │
-│                                │                        │            │
-│                                ▼                        ▼            │
-│                         Evaluator Service         AstraDB            │
-│                         (TypeScript)              (Vector Store)     │
-│                         Docker Sandbox            Voyage AI          │
-│                         (per submission)          (Embeddings)       │
-└──────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        REACT[React 19 Frontend<br/>TypeScript + Vite]
+    end
+
+    subgraph "Core Services"
+        PS[Problem Service<br/>Node.js/MongoDB]
+        SS[Submission Service<br/>Node.js/BullMQ]
+        AI[AI Service<br/>FastAPI/Python]
+    end
+
+    subgraph "Intelligence Layer"
+        GROQ[Groq LLM<br/>LangChain]
+        EMB[Voyage AI<br/>Embeddings]
+        VEC[AstraDB<br/>Vector Store]
+    end
+
+    subgraph "Execution Layer"
+        QUEUE[BullMQ Queue<br/>Redis-backed]
+        EVAL[Evaluator Service<br/>TypeScript]
+        DOCKER[Docker Sandbox<br/>per submission]
+    end
+
+    REACT --> PS
+    REACT --> SS
+    PS --> AI
+    AI --> GROQ
+    AI --> EMB
+    AI --> VEC
+    SS --> QUEUE
+    QUEUE --> EVAL
+    EVAL --> DOCKER
+    
+    style REACT fill:#61DAFB,stroke:#fff,stroke-width:2px,color:#000
+    style PS fill:#339933,stroke:#fff,stroke-width:2px,color:#fff
+    style SS fill:#339933,stroke:#fff,stroke-width:2px,color:#fff
+    style AI fill:#3776AB,stroke:#fff,stroke-width:2px,color:#fff
+    style DOCKER fill:#2496ED,stroke:#fff,stroke-width:2px,color:#fff
 ```
 
 ---
 
 ## 🤖 AI Service — The Intelligence Layer
 
-The AI Service (`coderX_aiService`) is the most technically complex component. It's a standalone Python microservice that does three things:
+The **AI Service** (`coderX_aiService`) is the most technically complex component. It's a standalone Python microservice that does three things:
 
-### 1. LLM-Powered Problem Generation
+### 1️⃣ LLM-Powered Problem Generation
 
-Uses **Groq API via LangChain** to generate structured coding problems from a topic + difficulty prompt:
+Uses **Groq API via LangChain** to generate structured coding problems:
 
 ```python
 # LangChain chain: prompt → Groq LLM → structured output
 chain = prompt_template | groq_llm | output_parser
-problem = chain.invoke({"topic": "Binary Trees", "difficulty": "Hard"})
+problem = chain.invoke({
+    "topic": "Binary Trees", 
+    "difficulty": "Hard"
+})
 # Returns: title, description, test_cases, editorial, complexity
 ```
 
-### 2. Semantic Deduplication via Vector Search
+### 2️⃣ Semantic Deduplication via Vector Search
 
-Before storing any problem, the service checks for near-duplicates using **Voyage AI embeddings + AstraDB vector search**:
+Before storing any problem, checks for near-duplicates using **Voyage AI embeddings + AstraDB**:
 
 ```python
 # Embed the new problem
 embedding = voyage_client.embed([problem.description])
 
-# Search AstraDB for similar problems (cosine similarity)
+# Search for similar problems
 similar = astra_collection.find(
     sort={"$vector": embedding},
     limit=5,
     projection={"$similarity": True}
 )
 
-# Reject if similarity > threshold
+# Reject if too similar
 if similar[0]["$similarity"] > DEDUP_THRESHOLD:
-    raise DuplicateProblemError("Too similar to existing problem")
+    raise DuplicateProblemError("Too similar to existing")
 ```
 
-### 3. Vector Storage with 1024-dim Embeddings
+### 3️⃣ Vector Storage
 
-Problems that pass deduplication are stored in **AstraDB** with their embeddings for future similarity checks — enabling the system to stay non-redundant as the problem bank grows.
+Problems that pass deduplication are stored with **1024-dim embeddings** for future similarity checks.
 
 ---
 
@@ -86,11 +140,13 @@ Problems that pass deduplication are stored in **AstraDB** with their embeddings
 
 The Evaluator Service (`coderX--Evaluator-Service`) runs submitted code inside **isolated Docker containers**:
 
-- **BullMQ job queue** (Redis-backed) receives submission payloads
-- A fresh Docker container is spun up per submission
-- Code executes in sandboxed environments: Python, Java, C++
-- Resource limits enforced (CPU, memory, time limits)
-- `stdout`/`stderr` streamed back in real time
+| Feature | Implementation |
+|---------|---------------|
+| Job Queue | BullMQ (Redis-backed) |
+| Isolation | Fresh Docker container per submission |
+| Languages | Python, Java, C++ |
+| Limits | CPU, memory, time limits enforced |
+| Streaming | stdout/stderr in real time |
 
 ```typescript
 // TypeScript: spin up container, run code, return verdict
@@ -103,38 +159,40 @@ const result = await containerFactory.run({
 });
 ```
 
-**This is the observability layer** — every execution is logged, timed, and tracked. Failed runs, TLE, MLE, and wrong answers are all captured with structured metadata.
-
 ---
 
 ## 🔍 Key Technical Decisions
 
-### Why BullMQ over direct execution?
+<details>
+<summary><b>📌 Why BullMQ over direct execution?</b></summary>
+<br/>
+Submission spikes would overwhelm the judge. BullMQ decouples ingestion from execution, enabling horizontal scaling of evaluator workers independently.
+</details>
 
-Submission spikes would overwhelm the judge. BullMQ decouples ingestion from execution, enabling horizontal scaling of the evaluator workers independently.
-
-### Why AstraDB over FAISS?
-
+<details>
+<summary><b>📌 Why AstraDB over FAISS?</b></summary>
+<br/>
 FAISS requires in-memory index rebuilds on restart. AstraDB is a persistent, serverless vector store — the deduplication index survives service restarts and scales automatically.
+</details>
 
-### Why Groq over OpenAI?
-
+<details>
+<summary><b>📌 Why Groq over OpenAI?</b></summary>
+<br/>
 Groq's inference latency is ~10x lower for LLaMA3 models. Problem generation is a synchronous API call — low latency matters for UX.
+</details>
 
 ---
 
 ## 🛠️ Full Tech Stack
 
-| Layer                   | Technology                                          |
-| ----------------------- | --------------------------------------------------- |
-| **Frontend**            | React 19, TypeScript, Vite, Tailwind CSS            |
-| **Problem Service**     | Node.js, Express.js, MongoDB, REST API              |
-| **Submission Service**  | Node.js, BullMQ, Redis, MongoDB                     |
-| **AI Service**          | Python, FastAPI, LangChain, Groq LLM                |
-| **Vector Store**        | AstraDB (DataStax), Voyage AI embeddings (1024-dim) |
-| **Judge / Evaluator**   | TypeScript, Docker, dockerode, BullMQ workers       |
-| **Languages Supported** | Python, Java, C++                                   |
-| **Monitoring**          | Bull Board (queue dashboard), structured logging    |
+| Layer | Technology | Badge |
+|-------|------------|-------|
+| **Frontend** | React 19, TypeScript, Vite, Tailwind | ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react) |
+| **Problem Service** | Node.js, Express, MongoDB | ![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=nodedotjs) |
+| **Submission Service** | Node.js, BullMQ, Redis | ![Redis](https://img.shields.io/badge/Redis-BullMQ-DC382D?logo=redis) |
+| **AI Service** | Python, FastAPI, LangChain | ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi) |
+| **Vector Store** | AstraDB, Voyage AI | ![AstraDB](https://img.shields.io/badge/AstraDB-Vector-005CBF?logo=datastax) |
+| **Judge** | TypeScript, Docker, dockerode | ![Docker](https://img.shields.io/badge/Docker-Sandbox-2496ED?logo=docker) |
 
 ---
 
@@ -142,20 +200,23 @@ Groq's inference latency is ~10x lower for LLaMA3 models. Problem generation is 
 
 ### Prerequisites
 
-- Node.js 18+, Python 3.10+, Docker
-- Redis (for BullMQ)
-- Groq API key, AstraDB credentials, Voyage AI key
+```bash
+✓ Node.js 18+
+✓ Python 3.10+
+✓ Docker
+✓ Redis (for BullMQ)
+✓ Groq API key + AstraDB credentials + Voyage AI key
+```
 
-### 1. AI Service
+### 1️⃣ AI Service
 
 ```bash
 cd coderX_aiService
 pip install -r requirements.txt
-# Set env vars: GROQ_API_KEY, ASTRA_DB_TOKEN, VOYAGE_API_KEY
 uvicorn main:app --reload --port 8001
 ```
 
-### 2. Problem Service
+### 2️⃣ Problem Service
 
 ```bash
 cd coderX---Problem_Service
@@ -163,7 +224,7 @@ npm install
 npm start  # port 3001
 ```
 
-### 3. Submission Service
+### 3️⃣ Submission Service
 
 ```bash
 cd coderX---submissionService
@@ -171,7 +232,7 @@ npm install
 npm start  # port 3002
 ```
 
-### 4. Evaluator Service
+### 4️⃣ Evaluator Service
 
 ```bash
 cd coderX--Evaluator-Service
@@ -179,7 +240,7 @@ npm install
 npm run dev  # consumes from BullMQ
 ```
 
-### 5. Frontend
+### 5️⃣ Frontend
 
 ```bash
 cd coderX_FrontEnd
@@ -208,40 +269,61 @@ GET  /health
 ### Submission Flow
 
 ```
-POST /api/submissions        → enqueues to BullMQ
+POST /api/submissions        → enqueued to BullMQ
 GET  /api/submissions/:id    → polls verdict
 WS   /ws/submissions/:id     → real-time verdict stream (planned)
 ```
 
 ---
 
-## 💡 What I Built End-to-End
+## 📊 Monitoring Dashboard
 
-This isn't a tutorial project. Every service — AI generation, semantic dedup, job queueing, Docker sandboxing, and the React frontend — was designed and implemented from scratch:
-
-- Designed the **microservices split** (which service owns what)
-- Chose **AstraDB over FAISS** after benchmarking persistence requirements
-- Tuned the **deduplication threshold** by testing against similar problems
-- Dealt with **real Docker edge cases**: container cleanup on TLE, OOM kills, zombie processes
-- Built **Bull Board integration** to monitor queue health in dev
+```bash
+# BullMQ Queue Dashboard
+http://localhost:3002/admin/queues
+```
 
 ---
 
-## 🔗 Related Repos
+## 💡 What I Built End-to-End
 
-This is a multi-repo project. Each service is in its own repository:
+This isn't a tutorial project. Every service was designed and implemented from scratch:
 
-| Service               | Repo                                                                                     |
-| --------------------- | ---------------------------------------------------------------------------------------- |
-| AI Problem Generation | [coderX_aiService](https://github.com/IamAbhinav01/coderX_aiService)                     |
-| Problem CRUD API      | [coderX---Problem_Service](https://github.com/IamAbhinav01/coderX---Problem_Service)     |
-| Submission Queue      | [coderX---submissionService](https://github.com/IamAbhinav01/coderX---submissionService) |
-| Docker Judge          | [coderX--Evaluator-Service](https://github.com/IamAbhinav01/coderX--Evaluator-Service)   |
-| Frontend              | [coderX_FrontEnd](https://github.com/IamAbhinav01/coderX_FrontEnd)                       |
+- ✅ Designed the **microservices split** (which service owns what)
+- ✅ Chose **AstraDB over FAISS** after benchmarking persistence
+- ✅ Tuned the **deduplication threshold** by testing against similar problems
+- ✅ Dealt with **real Docker edge cases**: container cleanup, OOM kills, zombie processes
+- ✅ Built **Bull Board integration** to monitor queue health
+
+---
+
+## 🔗 Microservices Quick Access
+
+| Service | Repo | Tech Stack |
+|:--------|:-----|:-----------|
+| 🤖 AI Service | [coderX_aiService](https://github.com/IamAbhinav01/coderX_aiService) | Python, FastAPI, Groq, LangChain |
+| 📝 Problem Service | [coderX---Problem_Service](https://github.com/IamAbhinav01/coderX---Problem_Service) | Node.js, Express, MongoDB |
+| 📤 Submission Service | [coderX---submissionService](https://github.com/IamAbhinav01/coderX---submissionService) | Node.js, BullMQ, Redis |
+| ⚡ Evaluator Service | [coderX--Evaluator-Service](https://github.com/IamAbhinav01/coderX--Evaluator-Service) | TypeScript, Docker, dockerode |
+| 🎨 Frontend | [coderX_FrontEnd](https://github.com/IamAbhinav01/coderX_FrontEnd) | React 19, TypeScript, Vite, Tailwind |
 
 ---
 
 ## 👨‍💻 Author
 
-**Abhinav Sunil** — CSE (AI/ML), Lovely Professional University · Grad 2027  
-[LinkedIn](https://www.linkedin.com/in/abhinav-sunil-870184279/) · [GitHub](https://github.com/IamAbhinav01) · abhinavsunil@hotmail.com
+<div align="center">
+  
+**Abhinav Sunil** — CSE (AI/ML), Lovely Professional University · Grad 2027
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/abhinav-sunil-870184279/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/IamAbhinav01)
+[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:abhinavsunil@hotmail.com)
+
+</div>
+
+---
+
+<div align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=14&duration=3000&pause=500&color=00F7FF&center=true&vCenter=true&width=400&lines=⭐+Star+the+repos+if+you+like+this+project!;🚀+Code.+Compete.+Conquer." />
+</div>
+```
